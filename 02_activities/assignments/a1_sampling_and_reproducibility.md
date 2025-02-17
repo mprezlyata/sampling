@@ -10,10 +10,22 @@ Modify the number of repetitions in the simulation to 100 (from the original 100
 
 Alter the code so that it is reproducible. Describe the changes you made to the code and how they affected the reproducibility of the script file. The output does not need to match Whitby’s original blogpost/graphs, it just needs to produce the same output when run multiple times
 
-# Author: YOUR NAME
+# Author: Marta Zaiats
 
 ```
 Please write your explanation here...
+Initial Population. The ppl DataFrame is created to represent 1000 individuals attending events: 200 individuals attend weddings and 800 individuals attend brunches.
+Infection Sampling. The function np.random.choice() is used to randomly select indices from the population without replacement. Sampling Frame: All 1000 individuals in the ppl DataFrame. Sample Size: Determined by len(ppl) * ATTACK_RATE, which results in 100 infections (10% of 1000). 
+Primary Contact Tracing Sampling. The function np.random.rand() generates random values between 0 and 1 for each infected individual. If the value is less than TRACE_SUCCESS, the individual is marked as traced (ppl['traced'] = True). Sampling Frame: Only infected individuals (sum(ppl['infected']) = 100). Sample Size: Determined by a Bernoulli trial with success probability TRACE_SUCCESS. On average, 20% of infected individuals (20 out of 100) are traced.
+Secondary Contact Tracing Sampling. Secondary tracing is not a random sampling step. Instead, it is a deterministic rule:
+o	Count how many infected individuals in each event were traced in the primary stage.
+o	If that event reached the SECONDARY_TRACE_THRESHOLD (≥2 traced infections), all infected people in that event are traced.
+This approach is entirely consistent with the procedure described in the article.
+The entire process described above is repeated 1000 times. By running it 1000 times, we get a distribution of outcomes (e.g., proportion of infections from weddings, proportion traced to weddings), which we visualize in the histograms. These histograms demonstrate that the observed proportion is biased upwards due to secondary contact tracing. A blue histogram shows the actual proportion of infections from weddings centered around 20%. A red histogram showing the observed proportion of traced cases from weddings shifted higher.
+With 100 runs, each simulation point (i.e., each proportion of wedding-linked infections and wedding-linked traces) carries more weight in the final distribution. As a result, the histogram may look “noisier” or less smooth compared to using 1000 runs.
+If we do not fix the random seed before each run, then each script execution will sample from a new set of random numbers. Consequently, each run can produce a different shape in the histograms.
+To make the script reproducible, we need to ensure that the random number generation produces the same results every time the script is run. This can be achieved by setting a fixed random seed using NumPy's np.random.seed() function. 
+
 
 ```
 
